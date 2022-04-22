@@ -1,0 +1,61 @@
+---
+ title: "Cryptic Crossword Clues"
+author: "Jon Geiger"
+date: '`r Sys.Date()`'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load}
+library(tidyverse)
+library(tidytuesdayR)
+library(scales)
+```
+
+```{r load-data}
+tt_data <- tt_load(2022, week = 16)
+
+```
+
+
+
+```{r}
+times <- tt_data$times %>% 
+    select(answer, clue_number) %>%
+    separate(clue_number, into = c("clue_number", "orientation"), sep = -1) %>%
+    mutate(
+        answer_length = nchar(str_replace_all(answer, "\\s", "")),
+        .after = answer, 
+        orientation = fct_recode(factor(orientation), 
+                                 Across = "a", Down = "d"),
+        clue_number = as.integer(clue_number)
+    ) %>%
+    filter(clue_number <= 60)
+
+ggplot(times, aes(x = clue_number, y = answer_length)) + 
+    geom_jitter(aes(color = orientation), alpha = 0.05, 
+                height = 0, width = 0.5) + 
+    facet_grid(cols = vars(orientation)) + 
+    geom_smooth(aes(color = orientation), color = "#777777", se = F) + 
+    theme_light() + 
+    labs(
+        x = "Clue Number", 
+        y = "Answer Length", 
+        title = "Answer Length based on Clue Number between Orientations"
+    ) + 
+    theme(
+        legend.position = "none"
+    )
+    
+
+
+```
+
+```{r export-png}
+
+ggsave()
+
+```
